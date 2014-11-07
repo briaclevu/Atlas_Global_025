@@ -1,0 +1,24 @@
+\cancel mode verify
+
+  def sym varmod   $1%DIC%
+  def sym vardat   $2%ALK%
+  def sym lonsmod   $3
+  def sym latsmod   $4
+    
+  define grid/like=($vardat) gridref
+! sho grid gridref
+    
+  let lonsd = x[gx=`($vardat),return=xaxis`]
+  let latsd = y[gy=`($vardat),return=yaxis`]
+  let latsm = xsequence(($latsmod))
+  let lonsm = xsequence(($lonsmod))
+    
+! Fix problem when model longitude (range -180 to +180) is outside data longitude range (0 to 360.)
+  let lonsdmin = lonsd[i=@min]
+  let lonsdmax = lonsd[i=@max]
+  let lonsm_lo = if lonsm    lt lonsdmin then lonsm    + 360. else lonsm
+  let lonsmd   = if lonsm_lo gt lonsdmax then lonsm_lo - 360. else lonsm_lo
+      
+  let ($varmod)_reg = scat2grid_bin_xy(lonsmd, latsm, xsequence(($varmod)), lonsd, latsd)
+
+set mode/last verify

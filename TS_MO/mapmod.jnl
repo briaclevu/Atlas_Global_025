@@ -1,0 +1,32 @@
+\cancel mode verify
+
+  def sym var     $1%DIC%
+  def sym lon     $2%lon%
+  def sym lat     $3%lat%
+  def sym xlabl   $4%no%
+  def sym ylabl   $5%no%
+  def sym pltopts $6
+  
+! James Orr, LSCE/IPSL, CEA-CNRS-UVSQ, CEA Saclay, 15 Oct 2014
+! ============================================================  
+! let varl = ($var)[x=@ave,y=($latmin):($latmax)@ave]
+  let varl = ($var)
+  
+  ppl labset 0.2,0.16,0.16,0.15
+  ppl axlsze 0.17, 0.17
+
+  ppl axnmtc 2, 2
+  ppl axlint 2, 1
+  ppl axlabp -1, -1
+  shade/nolab/set/hlim=120e:480e:30/vlim=90s:90n:30/mod/($pltopts) ($var), ($lon), ($lat)    
+  if ($xlabl%|no>FALSE|*>TRUE%) then
+    ppl xlab ($xlabl)
+  endif
+  if ($ylabl%|no>FALSE|*>TRUE%) then
+    ppl ylab ($ylabl)
+  endif
+    
+  ppl shade
+  go fland 60 gray36; go land
+
+set mode/last verify

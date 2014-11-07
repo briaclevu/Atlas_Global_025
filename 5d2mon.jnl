@@ -1,0 +1,39 @@
+
+\cancel mode verify
+!  Description: GO script to compute monthly averages from 5 day output
+
+  set mem/siz=300
+  def sym ifile    $1
+  def sym var      $2
+
+! use ORCA05-LMG01_20000101_20001231_5D_diad_T.nc
+  use "($ifile)"
+  use climatological_axes
+  can data climatological_axes
+
+! Extract year from annual data set (data set must not be for more than 1 year)
+  def sym yr `tax_year(t[l=1,gt=($var)], ($var)[i=1,j=1,k=1,l=1])`
+
+! Compute monthly means (put on month_noleap time axis)
+  let/title="($var)" ($var)_mo = ($var)[gt=month_noleap@mod,t=1-jan-($yr):31-dec-($yr)] 
+
+! Save out temporary file & read it back in (to be able to keep original var name)
+! save/clobber/file="tmp.nc" ($var)_mo, nav_lon, nav_lat
+! can data/all
+! can var/all
+! can axis/all
+! use tmp.nc
+! let/title="($var)" ($var) = ($var)_mo
+
+! Extract parts of ifile name (to use when builiding ofile name)
+  def sym DIRNAME=`SPAWN("dirname ($ifile)")`
+  def sym BASENAME=`SPAWN("basename ($ifile)")`
+  def sym model=`spawn("echo ($BASENAME) | awk -F_ '{print $1}'")`
+  def sym ymdbeg=`spawn("echo ($BASENAME) | awk -F_ '{print $2}'")`
+  def sym ymdend=`spawn("echo ($BASENAME) | awk -F_ '{print $3}'")`
+
+! Specify output file name and write out results on monthly mean axis
+  def sym ofile "($model)_($ymdbeg)_($ymdend)_1M_($var).nc"
+  save/clobber/file="($ofile)" ($var)_mo, nav_lon, nav_lat
+
+set mode/last verify

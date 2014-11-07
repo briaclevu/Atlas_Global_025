@@ -1,0 +1,11 @@
+\cancel mode verify
+
+  def sym vardat   $1%ALK%
+  def sym varref   $2%mask%
+    
+  define grid/like=($varref) gridref
+    
+  set mode interpolate
+  let ($vardat)_refgrid = ($vardat)[gx=gridref, gy=gridref] 
+
+set mode/last verify

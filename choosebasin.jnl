@@ -1,0 +1,52 @@
+\cancel mode verify
+
+  def sym obasn     $1%|atlarc|ind|pac|indopac|glo<You must specify one of this set: atlarc, ind, pac, indopac, OR glo)%
+    
+! Read the data (only the first time this routine is called)
+  if ($readbmask%|yes>FALSE|*>TRUE%) then
+!    Compute Basin mask information (convert from grid start at 20°E to start at 0°)
+!    -------------------------------------------------------------------------------
+     use "http://dods.ipsl.jussieu.fr/cgi-bin/nph-dods/ocmip/phase5/DATA/GRID/LEV_grid.nc"
+     use "http://dods.ipsl.jussieu.fr/cgi-bin/nph-dods/ocmip/phase5/DATA/specials/LEV_Basins.nc"
+     use "http://dods.ipsl.jussieu.fr/cgi-bin/nph-dods/ocmip/phase5/DATA/GRID/WOA2001_grid.nc"
+!
+!    Impose proper axes (instead of just indices in the LEV_Basins file)
+     let basin_on_lev20_grid = reshape(basin[d=LEV_Basins.nc],area[d=LEV_grid.nc])
+!
+!    Put on World Ocean Atlas grid (starting at 0° of longitude)
+     let basin_on_lev0_grid = basin_on_lev20_grid[gx=longitude@xact,gy=latitude@xact]
+     let bg0 = basin_on_lev0_grid
+!
+!    Do not consider marginal seas (areas where basin=3)
+     let bg  = if bg0 ne 3 then bg0
+    
+!    Signal that this if BLOCK has been executed (no need to repeat later in same execution of same script)
+     def sym readbmask yes
+  endif
+
+! Based on user input for obasn (glo, atlarc, ind, pac, indopac), set maskbasin = 1 in that zone (using Levitus mask)
+  if ($obasn%|glo>TRUE|*>FALSE%) then
+    def sym basntitle "Global"
+    def sym basncode "glo"
+    let maskbasin = if bg ge -1 then 1
+  elif ($obasn%|atlarc>TRUE|*>FALSE%) then
+    def sym basntitle "Atlantic"
+    def sym basncode "atl"
+    let maskbasin = if bg eq 0 or bg0 eq 2 then 1
+  elif ($obasn%|pac>TRUE|*>FALSE%) then
+    def sym basntitle "Pacific"
+    def sym basncode "pac"
+    let maskbasin = if bg eq 1 then 1
+  elif ($obasn%|ind>TRUE|*>FALSE%) then
+    def sym basntitle "Indian"
+    def sym basncode "ind"
+    let maskbasin = if bg eq 4 then 1
+  elif ($obasn%|indopac>TRUE|*>FALSE%) then
+    def sym basntitle "Indian + Pacific"
+    def sym basncode "indpac"
+    let maskbasin = if (bg eq 4) OR (bg eq 1) then 1
+  endif
+
+  let maskbasin3D = reshape(maskbasin,mask[d=WOA2001_grid.nc])
+        
+set mode/last verify
