@@ -1,0 +1,45 @@
+\cancel mode verify
+
+! Description: plots a zonal mean section for selected basin
+! Briac Le Vu, from zmsurf
+! James Orr, LSCE/IPSL, CEA-CNRS-UVSQ, CEA Saclay, 1 Nov 2014
+! ============================================================
+
+  def sym var     $1%CO3%
+  def sym basn    $2%glo%
+  def sym xlabl   $3%no%
+  def sym ylabl   $4%no%
+  def sym latmin  $5%+70%
+  def sym latmax  $6%+90%
+  def sym pltopts $7
+  def sym overplt $8%over%
+
+! Select basin (mask out all others)
+  go choosebasin ($basn)
+    
+  let ($var)bmskd  = ($var) * maskbasin3D
+
+  if ($overplt%|over>FALSE|*>TRUE%) then  !Pre-plot setup (only if it is the 1st plot, i.e., not an overplot)
+!   ppl axnmtc 4, 4 
+!   ppl axlint 1, 1
+    ppl labset 0.2,0.19,0.19,0.15
+    ppl axlsze 0.19, 0.19
+!   ppl axlabp +1, -1
+  endif
+
+  shade/($pltopts) ($var)bmskd[x=@ave]
+
+  if ($overplt%|over>FALSE|*>TRUE%) then  !Post-plot setup (only if it is the 1st plot; not an overplot)
+!   ppl xfor ($xformat)
+    ppl yfor ($yformat)
+!   ppl cross 1
+    if ($xlabl%|no>FALSE|*>TRUE%) then
+      ppl xlab ($xlabl)
+    endif
+    if ($ylabl%|no>FALSE|*>TRUE%) then
+      ppl ylab ($ylabl)
+    endif
+    ppl plot
+  endif
+
+set mode/last verify

@@ -25,12 +25,29 @@ for ((an = $deb; an <= $fin; an++)); do
 done
 
 #3: get the MBG monthly output fields
-export deb=1958
-export fin=2010
+deb=1958
+fin=1990
 # go to the MBG/MO tmpdir 
 cd ${WORKDIR}/temp/ORCA025/MBG/MO
 # get each monthly field of each year
-for field in PO4 NIT SIL CHL OXY FER DIC ALK CO3 PH
+for field in PNEW PP
+# PO4 NIT SIL CHL OXY FER DIC ALK CO3 PH
+do
+ for ((an = $deb; an <= $fin; an++)); do
+    mfget ${indir}/MBG/Output/MO/ORCA025-PIS2DIC_${an}0101_${an}1231_1M_${field}.nc .
+ done
+done
+#
+deb=1958
+fin=1972
+# go to the MBG/MO tmpdir 
+cd ${WORKDIR}/temp/ORCA025/MBG/MO
+# get each monthly field of each year
+for field in PO4 NIT SIL FER DIC ALK
+#PHY ZOO
+#CHL OXY PO4 NIT SIL FER DIC ALK
+#PHY ZOO CHL OXY
+#PH CO3 PO4 NIT SIL CHL OXY FER DIC ALK
 do
  for ((an = $deb; an <= $fin; an++)); do
     mfget ${indir}/MBG/Output/MO/ORCA025-PIS2DIC_${an}0101_${an}1231_1M_${field}.nc .

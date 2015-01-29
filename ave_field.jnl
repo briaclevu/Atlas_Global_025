@@ -1,0 +1,28 @@
+\cancel mode verify
+!  Description: GO script to compute monthly average quantity between 2 level
+  set mem/siz=300
+  def sym ifile   $1
+  def sym vardat  $2
+  def sym level1  $3
+  def sym level2  $4
+
+  use "($ifile)"
+  use "ORCA025-PIS2DIC/GRID/mesh_zgr.nc"
+
+! Define z axis
+  def axis/z/depth/units='meters'/name=deptht nav_lev[d=2]
+
+! assign deptht value to depth of the T output
+  let ($vardat)dep=($vardat)[d=1,gz=deptht@asn]
+  let ($vardat)z = if ($vardat)dep then ($vardat)dep
+
+! avg field over depth level
+  let AVE($vardat)=($vardat)z[z=($level1):($level2)@ave]
+
+! create saving file for the first time step
+  save/clobber/file="tmp_file.nc" AVE($vardat)[l=1], nav_lon, nav_lat
+
+! repeat for the last 11 month
+  repeat/l=2:12:1 (save/append/file="tmp_file.nc" AVE($vardat))
+
+set mode/last verify
